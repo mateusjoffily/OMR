@@ -147,7 +147,6 @@ for n = 1:Nscr    % Loop over Multi-image TIFF files
     
 end
 
-
  % Display final images
  figure
  subplot(1,3,1), imshow(REF{1}), axis image
@@ -170,5 +169,16 @@ end
  title('Negative Source Masked');
  subplot(1,2,2), imshow(~MSK{1} .* 1-Scale(aSRC)), axis image
  title('Negative Source Realigned Masked');
+
+end
+
+function output = Scale(input)
+% output = Scale(input)
+% Perform an affine scaling to put data in range [0-1].
+%
+% Adapted from Psychtoolbox-3 (http://psychtoolbox.org/)
+
+[minval,maxval] = MatMinMax(input);
+output          = (input - minval) ./ (maxval-minval);
 
 end
