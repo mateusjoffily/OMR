@@ -178,7 +178,8 @@ function output = Scale(input)
 %
 % Adapted from Psychtoolbox-3 (http://psychtoolbox.org/)
 
-[minval,maxval] = MatMinMax(input);
-output          = (input - minval) ./ (maxval-minval);
+minval = min(input(:));
+maxval = max(input(:));
+output = (input - minval) ./ (maxval-minval);
 
 end
