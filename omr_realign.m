@@ -1,4 +1,4 @@
-function [SRC_aligned P fval] = omr_realign(SRC, REF, XY)    
+function [SRC_aligned P fval] = omr_realign(SRC, REF, TGT, XY, page)    
 %%
 % Copyright Universita di Trento, Italy, and Centre National de la 
 % Recherche Scientifique, France : Mateus Joffily, 2007 and 2017.
@@ -35,26 +35,20 @@ function [SRC_aligned P fval] = omr_realign(SRC, REF, XY)
 % knowledge of the CeCILL license and that you accept its terms.%%
 %%
 
-% Estimate a good starting point to image translation
-%----------------------------------------------------
-[M,N]   = size(REF);
-[x0,y0] = find(REF<=0);
-[x1,y1] = find(SRC<=0);
-
-dx      = mean( [(min(x1) - min(x0)) (max(x1) - max(x0))] );
-dy      = mean( [(min(y1) - min(y0)) (max(y1) - max(y0))] );
-
-px      = -dx * diff(XY(1,:))/M;
-py      = -dy * diff(XY(2,:))/N;
-
 % Set initial values for transformation
 %----------------------------------------------------
-P0      = [py px 0 1 1];  
+%P0      = [0 0 0 1 1];          % with scalling
+P0      = [0 0 0];              % without scalling
+
+% mask region outside target area
+nTGT = cast(~TGT,class(TGT));
+cREF = REF .* nTGT + TGT;
+cSRC = SRC .* nTGT + TGT;
 
 % Find transformation to align image
 %----------------------------------------------------
 options      = optimset('Display','iter', 'TolFun', 10^-3, 'TolX', 10^-3);
-[P, fval, e] = fminsearch('omr_transform', P0, options, REF, SRC, XY);
+[P, fval, e] = fminsearch('omr_transform', P0, options, cREF, cSRC, XY);
 
 % Realign image using optimized parameters
 %----------------------------------------------------

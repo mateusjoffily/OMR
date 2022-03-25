@@ -12,9 +12,10 @@ To run the scripts with your own image files, you’ll need to :
 
 (1) create a reference image: this is just the image of a blank form. 
 (2) create a mask image: this is an image with dark blobs at the locations that should be filled in the form.
-(3) place the image of each filled form in the same folder (e.g. '.\example\subjects'). 
+(3) create a target image: this is a blank (white) image of the size of the reference image with black areas around the target zones in the reference image. This is used to help the realigment.
+(4) place the image of each filled form in the same folder (e.g. '.\example\subjects'). 
 
-The current version of OMR Toolbox was tested using Matlab R2007b in Win XP. Notice that Matlab Image Processing Toolbox is required.
+The current version of OMR Toolbox was tested using Matlab R2022b in Windows 10, and requires the Matlab Image Processing Toolbox.
 
 Good luck!
 

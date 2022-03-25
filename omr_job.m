@@ -1,4 +1,4 @@
-function omr_job(fref, fmsk, dsrc, Ipages, fout, OMR_RATINGS, analyzeONLY)
+function omr_job(fref, fmsk, ftgt, dsrc, Ipages, fout, OMR_RATINGS, analyzeONLY)
 %%
 % Copyright Universita di Trento, Italy, and Centre National de la 
 % Recherche Scientifique, France : Mateus Joffily, 2007 and 2017.
@@ -43,36 +43,29 @@ if exist('OCTAVE_VERSION', 'builtin') ~= 0
     end
 end
 
+if nargin < 8
+    options = 1;
+end
+
 if nargin < 7
     analyzeONLY = false;
 end
 
 if analyzeONLY
     % Use pre-processed data
-    load([fout '.mat'], 'data', 'fsrc');
+    load(fout, 'data', 'fsrc');
 else
     % Process images
-    [data,fsrc] = omr_main(fref, fmsk, dsrc, Ipages);
+    [data,fsrc] = omr_main(fref, fmsk, ftgt, dsrc, Ipages);
 
     % Save results to matlab file
-    save([fout '.mat'], 'data', 'fsrc');
+    save(fout, 'data', 'fsrc');
 end
 
 % Get scales ratings
 ratings = OMR_RATINGS(data);
 
 % Save results to matlab file
-save([fout '.mat'], 'ratings', '-APPEND');
-
-% Save results to text file
-fid = fopen([fout '.txt'], 'w');
-for i = 1:size(ratings{1},1)
-    fprintf(fid, '%s\t', fsrc(i).name);
-    for j = 1:size(ratings{1},1)
-        fprintf(fid, '%d\t', [ratings{j}(i,:).value]');
-    end
-    fprintf(fid, '\n');
-end
-fclose(fid);
+save(fout, 'ratings', '-APPEND');
 
 end

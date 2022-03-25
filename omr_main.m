@@ -1,4 +1,4 @@
-function [data,fsrc] = omr_main(fref, fmsk, dsrc, Ipages)
+function [data,fsrc] = omr_main(fref, fmsk, ftgt, dsrc, Ipages)
 %%
 % Copyright Universita di Trento, Italy, and Centre National de la 
 % Recherche Scientifique, France : Mateus Joffily, 2007 and 2017.
@@ -37,6 +37,11 @@ function [data,fsrc] = omr_main(fref, fmsk, dsrc, Ipages)
 
 % List of selected images in 'dsrc' directory
 fimg  = dir(dsrc);
+if isempty(fimg)
+    disp('TIFF images not found in SRC folder.');
+    return
+end
+
 imfmt = imformats;
 imext = strcat('.',[imfmt.ext]);
 Nimg  = length(fimg);
@@ -60,6 +65,7 @@ Nref  = numel(fref);
 % Preallocate memory for cell arrays
 REF   = cell(1,Nref);     % Reference images
 MSK   = cell(1,Nref);     % Mask images
+TGT   = cell(1,Nref);     % Target images
 BLOBS = cell(1,Nref);     % Mask images blobs
 XY    = cell(1,Nref);     % World coordinates of REF images
 
@@ -79,6 +85,8 @@ for i = 1:numel(fref)   % loop over reference images
     REF{i}        = omr_adjust_image(REF{i}, map);   % convert to intensity image and scale
     [MSK{i},map]  = imread(fmsk{i});                 % mask image
     MSK{i}        = omr_adjust_image(MSK{i}, map);   % convert to intensity image and scale
+    [TGT{i},map]  = imread(ftgt{i});                 % realigment image
+    TGT{i}        = omr_adjust_image(TGT{i}, map);   % convert to intensity image and scale
 
     % Resize images, if they are too large
     if numel(REF{i}) > 1024*800
@@ -86,6 +94,7 @@ for i = 1:numel(fref)   % loop over reference images
         REF{i} = imresize(REF{i}, gain);
     end
     MSK{i} = imresize(MSK{i}, size(REF{i}));
+    TGT{i} = imresize(TGT{i}, size(REF{i}));
 
     % Set spatial location of the REF image in the world: 
     %  - center at (0,0)
@@ -98,6 +107,10 @@ for i = 1:numel(fref)   % loop over reference images
     % Make binary mask
     MSK{i}(MSK{i}<0.5)  = 0;
     MSK{i}(MSK{i}>=0.5) = 1;
+
+    % Make binary realigment image
+    TGT{i}(TGT{i}<0.5)  = 0;
+    TGT{i}(TGT{i}>=0.5) = 1;
 
     % Locate blobs in mask and label them in a meaningful way
     BLOBS{i} = omr_mask_labels(MSK{i});
@@ -115,20 +128,20 @@ data = struct('values', {}, 'labels', {}, 'fval', {});
 
 for n = 1:Nscr    % Loop over Multi-image TIFF files    
     % Display some feedback information to the user
-    disp(['reading file: ' fsrc(n).name ' (' num2str(Npages) ' pages)']);
+    disp(['reading file: ' fsrc(n).name ' (' num2str(n) '/' num2str(Nscr) ', ' num2str(Npages) ' pages)']);
     
     for p = 1:Npages    % Loop over pages
         % Read single image from Multi-image TIFF file
         [SRC,map]       = imread(fullfile(psrc, fsrc(n).name), IpagesALL.num(p));
-        
+
         % Convert image to intensity
-        SRC             = omr_adjust_image(SRC, map);
+        SRC = omr_adjust_image(SRC, map);
         
-        % Resize source image to the same size of reference image
-        SRC             = imresize(SRC, size(REF{IpagesALL.idx(p)}));
+        % Resize SRC to the size of REF
+        SRC = imresize(SRC, size(REF{IpagesALL.idx(p)}));
         
-        % Realign source to reference image
-        [aSRC,P,fval]   = omr_realign(SRC, REF{IpagesALL.idx(p)}, XY{IpagesALL.idx(p)});
+        % Realign SRC to REF image
+        [aSRC,P,fval]   = omr_realign(SRC, REF{IpagesALL.idx(p)}, TGT{IpagesALL.idx(p)}, XY{IpagesALL.idx(p)}, p);
         
         % mask source image
         mSRC            = ~MSK{IpagesALL.idx(p)} .* 1-Scale(aSRC);
@@ -147,28 +160,40 @@ for n = 1:Nscr    % Loop over Multi-image TIFF files
     
 end
 
- % Display final images
- figure
- subplot(1,3,1), imshow(REF{1}), axis image
- title('Reference');
- subplot(1,3,2), imshow(SRC), axis image
- title('Source Native');
- subplot(1,3,3), imshow(aSRC), axis image
- title('Source Realigned');
- 
- figure
- subplot(1,3,1), imshow(MSK{1} .* REF{1}), axis image
- title('Reference Masked');
- subplot(1,3,2), imshow(MSK{1} .* SRC), axis image
- title('Source Masked');
- subplot(1,3,3), imshow(MSK{1} .* aSRC), axis image
- title('Source Realigned Masked');
- 
- figure
- subplot(1,2,1), imshow(~MSK{1} .* 1-Scale(SRC)), axis image
- title('Negative Source Masked');
- subplot(1,2,2), imshow(~MSK{1} .* 1-Scale(aSRC)), axis image
- title('Negative Source Realigned Masked');
+% Display final images
+i = IpagesALL.idx(p);
+
+figure
+ax = subplot(1,3,1); imagesc(REF{i}), axis image
+title('Reference');
+ax(2) = subplot(1,3,2); imagesc(SRC), axis image
+title('Source Native');
+ax(3) = subplot(1,3,3); imagesc(aSRC), axis image
+title('Source Realigned');
+linkaxes(ax);
+
+figure
+ax = subplot(1,3,1), imagesc(MSK{i} .* REF{i}); axis image
+title('Reference Masked');
+ax(2) = subplot(1,3,2); imagesc(MSK{i} .* SRC); axis image
+title('Source Masked');
+ax(3) = subplot(1,3,3); imagesc(MSK{i} .* aSRC); axis image
+title('Source Realigned Masked');
+linkaxes(ax);
+
+figure
+ax = subplot(1,2,1); imagesc(REF{i}); axis image
+title('Reference');
+ax(2) = subplot(1,2,2); imagesc(MSK{i}); axis image
+title('Mask');
+linkaxes(ax);
+
+figure
+ax = subplot(1,2,1); imagesc(~MSK{i} .* 1-Scale(SRC)); axis image
+title('Negative Source Masked');
+ax(2) = subplot(1,2,2); imagesc(~MSK{i} .* 1-Scale(aSRC)); axis image
+title('Negative Source Realigned Masked');
+linkaxes(ax);
 
 end
 

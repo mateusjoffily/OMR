@@ -35,24 +35,28 @@ function A = omr_matrix(P2)
 % knowledge of the CeCILL license and that you accept its terms.%%
 %%
 
+P      = zeros(1,12);
 % Define affine transformation matrix: A
 %   P(1)  - x translation
 %   P(2)  - y translation
 %   P(3)  - z translation
-P(1:3) = [P2(1) P2(2) 0];
+P(1:2) = P2(1:2);
 %   P(4)  - x rotation about - {pitch} (radians)
 %   P(5)  - y rotation about - {roll}  (radians)
 %   P(6)  - z rotation about - {yaw}   (radians)
- P(4:6) = [0 0 P2(3)];
+ P(6)  = P2(3);
 %   P(7)  - x scaling
 %   P(8)  - y scaling
 %   P(9)  - z scaling
-P(7:9) = [P2(4) P2(5) 1];
+if length(P2) == 3
+    P(7:9) = [1 1 1];
+else
+    P(7:9) = [P2(4) P2(5) 1];
+end    
 %   P(10) - x affine
 %   P(11) - y affine
 %   P(12) - z affine
 % P(10:12) = [P2(6) 0 0];
-P(10:12) = [0 0 0];
 
 A        = spm_matrix(P);        % 3D transformation matrix
 A        = A([1 2 4],[1 2 4]);   % reduce transformation matrix to 2D

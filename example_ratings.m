@@ -53,34 +53,34 @@ for n = 1:Nsub    % Loop over subjects
         idx = Nratings_per_page * (p-1);
         
         % Smile
-        face1(n, idx+1) = omr_get_rating(data(n,p), 101:105);
-        face1(n, idx+2) = omr_get_rating(data(n,p), 406:410);
-        face1(n, idx+3) = omr_get_rating(data(n,p), 1001:1005);
-        face1(n, idx+4) = omr_get_rating(data(n,p), 706:710);
+        face1(n, idx+1) = omr_get_rating(data(n,p), [ 6 16 28 40 48]);
+        face1(n, idx+2) = omr_get_rating(data(n,p), [52 67 74 89 95]);
+        face1(n, idx+3) = omr_get_rating(data(n,p), [ 1 15 24 35 43]);
+        face1(n, idx+4) = omr_get_rating(data(n,p), [55 70 77 82 98]);
 
         % Frown
-        face2(n, idx+1) = omr_get_rating(data(n,p), 301:305);
-        face2(n, idx+2) = omr_get_rating(data(n,p), 106:110);
-        face2(n, idx+3) = omr_get_rating(data(n,p), 901:905);
-        face2(n, idx+4) = omr_get_rating(data(n,p), 1006:1010);
+        face2(n, idx+1) = omr_get_rating(data(n,p), [ 8 18 30 37 50]);
+        face2(n, idx+2) = omr_get_rating(data(n,p), [58 64 79 86 92]);
+        face2(n, idx+3) = omr_get_rating(data(n,p), [ 5 14 23 34 42]);
+        face2(n, idx+4) = omr_get_rating(data(n,p), [51 63 72 85 91]);
 
         % Listen
-        face3(n, idx+1) = omr_get_rating(data(n,p), 201:205);
-        face3(n, idx+2) = omr_get_rating(data(n,p), 506:510);
-        face3(n, idx+3) = omr_get_rating(data(n,p), 601:605);
-        face3(n, idx+4) = omr_get_rating(data(n,p), 806:810);
+        face3(n, idx+1) = omr_get_rating(data(n,p), [ 7 17 29 36 49]);
+        face3(n, idx+2) = omr_get_rating(data(n,p), [53 68 75 90 96]);
+        face3(n, idx+3) = omr_get_rating(data(n,p), [ 2 11 27 31 46]);
+        face3(n, idx+4) = omr_get_rating(data(n,p), [56 61 78 83 99]);
 
         % Thought
-        face4(n, idx+1) = omr_get_rating(data(n,p), 401:405);
-        face4(n, idx+2) = omr_get_rating(data(n,p), 206:210);
-        face4(n, idx+3) = omr_get_rating(data(n,p), 801:805);
-        face4(n, idx+4) = omr_get_rating(data(n,p), 606:610);
+        face4(n, idx+1) = omr_get_rating(data(n,p), [ 9 19 25 38 44]);
+        face4(n, idx+2) = omr_get_rating(data(n,p), [59 65 80 87 93]);
+        face4(n, idx+3) = omr_get_rating(data(n,p), [ 4 13 22 33 41]);
+        face4(n, idx+4) = omr_get_rating(data(n,p), [54 69 76 81 97]);
 
         % Sleep
-        face5(n, idx+1) = omr_get_rating(data(n,p), 501:505);
-        face5(n, idx+2) = omr_get_rating(data(n,p), 306:310);
-        face5(n, idx+3) = omr_get_rating(data(n,p), 701:705);
-        face5(n, idx+4) = omr_get_rating(data(n,p), 906:910);
+        face5(n, idx+1) = omr_get_rating(data(n,p), [10 20 26 39 45]);
+        face5(n, idx+2) = omr_get_rating(data(n,p), [60 66 73 88 94]);
+        face5(n, idx+3) = omr_get_rating(data(n,p), [ 3 12 21 32 47]);
+        face5(n, idx+4) = omr_get_rating(data(n,p), [57 62 71 84 100]);
     end
 end
 

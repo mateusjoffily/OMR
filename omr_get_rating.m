@@ -35,29 +35,25 @@ function rating = omr_get_rating(data, labels)
 % knowledge of the CeCILL license and that you accept its terms.%%
 %%
 
-% Find blobs related to scale
-[idx,order] = ismember(data.labels,labels);
-
 % Get blobs values
-blobs_values = data.values( idx );
-blobs_values = blobs_values(order(order>0));
+blobs_values = data.values( labels );
 
-% Select blob with value higher than 1.5x minimum
-value = find( blobs_values > 1.5 * min(blobs_values) );
+% Select blob with value higher than thresh
+[y,i]  = sort(blobs_values,'descend');
+% thresh = 0.5*(max(blobs_values)-min(blobs_values))+min(blobs_values);
+thresh = 1/3;   % assume that a fully filled blob equals to 1 
+value  = i(y>thresh);
 
-if isempty(value)
+if isempty(value) || var(blobs_values)<10^-5
     % If scale is blank, set NaN 
-    value = NaN;
+    % value  = NaN;
     status = 'blank';
-
 elseif numel(value) > 1
-    % If scale was rated in more than one option, set NaN 
-    value = NaN;
-    status = 'ambiguous';
-
+    % If scale was rated in more than one option, 
+    % set values ordered by blobs decreasng intensity
+    status = 'multiple';
 else    
-    status = 'ok';
-    
+    status = 'single';    
 end
 
 % Return rating
